@@ -33,7 +33,7 @@ if not os.path.exists(db_path):
 
 def cropvideo(new_path, user_id):
     timestamp = time.time()
-    out_path = f"{dir}/{user_id}/output_{timestamp}.mp4"
+    out_path = f"{dir}/download/{user_id}/output_{timestamp}.mp4"
     ffmpeg_cmd = [
         "ffmpeg",
         "-i", new_path,
@@ -106,12 +106,12 @@ def handle_video(message):
             file_info = bot.get_file(video_fid)
 
             download_file = bot.download_file(file_info.file_path)
-            os.makedirs(f"{dir}/{user_id}/videos", exist_ok=True)
-            path = f"{dir}/{user_id}/{file_info.file_path}"
+            os.makedirs(f"{dir}/download/{user_id}/videos", exist_ok=True)
+            path = f"{dir}/download/{user_id}/{file_info.file_path}"
             with open(path, "wb") as f:
                 f.write(download_file)
-            new_fname = message.video.file_name
-            new_path = f"{dir}/{user_id}/{message.date}_{new_fname}"
+            new_fname = message.video.file_name or "notitle.mp4"
+            new_path = f"{dir}/download/{user_id}/{message.date}_{new_fname}"
             os.rename(path, new_path)
 
             try:
@@ -146,6 +146,7 @@ def handle_video(message):
                 conn.commit()
             player = getuser(message)
             logging(f"{player} Made a video_note.")
+            logging(f"File name: {new_fname}") if new_fname != "notitle.mp4" else None
         else:
             bot.send_message(user_id, "File too big. Send video smaller than 20M.")
 
